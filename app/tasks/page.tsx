@@ -33,7 +33,6 @@ export default function TasksPage() {
     stage: "todo" as "todo" | "pending" | "done",
     due_date: "",
   });
-  const supabase = createClient();
 
   useEffect(() => {
     fetchTasks();
@@ -41,6 +40,8 @@ export default function TasksPage() {
 
   const fetchTasks = async () => {
     try {
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -66,6 +67,8 @@ export default function TasksPage() {
 
   const handleCreateTask = async () => {
     try {
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       // Get current user
       const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -138,6 +141,8 @@ export default function TasksPage() {
     if (!editingTask) return;
 
     try {
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       const { error } = await supabase
         .from("tasks")
         .update({ ...formData })
@@ -156,6 +161,8 @@ export default function TasksPage() {
 
   const handleDeleteTask = async (id: string) => {
     try {
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       const { error } = await supabase.from("tasks").delete().eq("id", id);
       if (error) throw error;
 
@@ -225,6 +232,8 @@ export default function TasksPage() {
     if (!draggedTask || draggedTask.stage === targetStage) return;
 
     try {
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       const { error } = await supabase
         .from("tasks")
         .update({ stage: targetStage as any })

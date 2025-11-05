@@ -26,7 +26,6 @@ export default function CalendarPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
   const [events, setEvents] = useState<any[]>([]);
-  const supabase = createClient();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -36,26 +35,9 @@ export default function CalendarPage() {
     priority: "medium",
   });
 
-  useEffect(() => {
-    fetchEvents();
-
-    // Realtime subscription
-    const channel = supabase.channel('events-changes')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'events'
-      }, () => {
-        fetchEvents();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [currentDate]);
-
   const fetchEvents = async () => {
+    // Create client only when needed (lazy initialization)
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -71,6 +53,26 @@ export default function CalendarPage() {
 
     if (data) setEvents(data);
   };
+
+  useEffect(() => {
+    fetchEvents();
+
+    // Realtime subscription
+    const supabase = createClient();
+    const channel = supabase.channel('events-changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'events'
+      }, () => {
+        fetchEvents();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentDate]);
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -106,6 +108,8 @@ export default function CalendarPage() {
 
   const handleSaveEvent = async () => {
     try {
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         alert("You must be signed in to save events.");
@@ -177,6 +181,8 @@ export default function CalendarPage() {
 
   const handleDeleteEvent = async (id: string) => {
     try {
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       const { error } = await supabase.from("events").delete().eq("id", id);
       if (error) throw error;
       fetchEvents();

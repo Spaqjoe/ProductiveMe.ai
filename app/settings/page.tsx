@@ -15,10 +15,11 @@ export default function SettingsPage() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const supabase = createClient();
 
   useEffect(() => {
     const getUser = async () => {
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setEmail(user.email || "");
@@ -37,6 +38,8 @@ export default function SettingsPage() {
         return;
       }
 
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
@@ -72,6 +75,8 @@ export default function SettingsPage() {
     try {
       setLoading(true);
 
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       const { error } = await supabase.auth.updateUser({
         email,
         data: { full_name: fullName }

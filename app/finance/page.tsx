@@ -9,13 +9,14 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recha
 type Txn = { id: string; kind: "income" | "expense"; amount: number; created_at?: string; note?: string };
 
 export default function FinancePage() {
-  const supabase = createClient();
   const [txns, setTxns] = useState<Txn[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Create client only when needed (lazy initialization)
+        const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) { setTxns([]); setLoading(false); return; }
         const { data } = await supabase

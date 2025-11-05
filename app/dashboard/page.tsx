@@ -11,10 +11,11 @@ import { ScreenTimeWidget } from "@/components/dashboard/screentime-widget";
 
 export default function DashboardPage() {
   const [userName, setUserName] = useState("");
-  const supabase = createClient();
 
   useEffect(() => {
     const getUser = async () => {
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserName(user.user_metadata?.full_name || user.email || "User");
