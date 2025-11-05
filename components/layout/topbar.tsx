@@ -285,6 +285,32 @@ export function Topbar() {
             </div>
           </SheetContent>
         </Sheet>
+        {/* AI Sparkles (desktop only) */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hidden md:inline-flex cursor-pointer"
+          aria-label="Open AI Copilot"
+          onClick={() => setAiSheetOpen(true)}
+        >
+          <HiOutlineSparkles className="h-5 w-5" />
+        </Button>
+
+        {/* Theme toggle (desktop only) */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hidden md:inline-flex cursor-pointer"
+          onClick={toggleTheme}
+          aria-label="Toggle theme"
+        >
+          {mounted && theme === "dark" ? (
+            <IoSunnyOutline className="h-5 w-5" />
+          ) : (
+            <IoMoonOutline className="h-5 w-5" />
+          )}
+        </Button>
+
         {/* Notifications */}
         <Button variant="ghost" size="icon" className="cursor-pointer" onClick={() => setNotificationSheetOpen(true)}>
           {notifications.length > 0 ? (

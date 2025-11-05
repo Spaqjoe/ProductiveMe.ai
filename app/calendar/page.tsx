@@ -333,138 +333,243 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="grid grid-cols-12 gap-6">
-      {/* Left Sidebar */}
-      <div className="col-span-3 space-y-4">
-        <MiniCalendar currentDate={currentDate} onDateChange={setCurrentDate} />
-        <EventHistory />
+    <div className="space-y-4">
+      {/* Desktop layout */}
+      <div className="hidden md:grid grid-cols-12 gap-6">
+        {/* Left Sidebar */}
+        <div className="col-span-3 space-y-4">
+          <MiniCalendar currentDate={currentDate} onDateChange={setCurrentDate} />
+          <EventHistory />
+        </div>
+
+        {/* Main Content */}
+        <div className="col-span-9 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Calendar</h1>
+              <p className="text-muted-foreground">Manage your events and schedule</p>
+            </div>
+            <Button
+              variant="default"
+              onClick={handleCreateEvent}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              <RxPlus className="mr-2" />
+              New Event
+            </Button>
+          </div>
+
+          {/* View Tabs */}
+          <div className="flex gap-2 border-b">
+            {(["month", "week", "day"] as const).map((v) => (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className={cn(
+                  "px-6 py-2 text-sm font-medium transition-colors capitalize border-b-2",
+                  view === v
+                    ? "border-[hsl(var(--primary))] text-[hsl(var(--primary))]"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+
+          {/* Month Navigation */}
+          {view === "month" && (
+            <>
+              <div className="flex items-center justify-between">
+                <Button variant="ghost" size="icon" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}>
+                  <RxChevronLeft className="h-5 w-5" />
+                </Button>
+                <h2 className="text-2xl font-bold">{monthName}</h2>
+                <Button variant="ghost" size="icon" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}>
+                  <RxChevronRight className="h-5 w-5" />
+                </Button>
+              </div>
+
+              {/* Calendar Grid */}
+              <Card className="rounded-lg border">
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-7 gap-2 mb-2">
+                    {daysOfWeek.map((day) => (
+                      <div
+                        key={day}
+                        className="text-center text-sm font-semibold text-foreground p-2 border-b-2 border-border border-[hsl(var(--foreground))] text-[hsl(var(--foreground))]"
+                      >
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-7 gap-2">
+                    {days.map((day, idx) => (
+                      <div
+                        key={idx}
+                        className={cn(
+                          "min-h-[100px] border-2 rounded-lg p-2 transition-colors",
+                          "border-border dark:border-white/10",
+                          day === today && "border-[hsl(var(--primary))] dark:border-[hsl(var(--primary))]",
+                          !day && "border-[hsl(var(--foreground))]"
+                        )}
+                      >
+                        {day && (
+                          <>
+                            <div className="flex items-start justify-between mb-1">
+                              <span
+                                className={cn(
+                                  "inline-flex h-7 w-7 items-center justify-center rounded-md text-sm font-semibold",
+                                  day === today
+                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                    : "border-[hsl(var(--foreground))] text-[hsl(var(--foreground))]"
+                                )}
+                              >
+                                {day}
+                              </span>
+                            </div>
+                            <div className="space-y-1">
+                              {getEventsForDate(day).map((event) => (
+                                <div
+                                  key={event.id}
+                                  className={cn(
+                                    "text-xs p-1 rounded border-l-2 cursor-pointer hover:opacity-80",
+                                    getPriorityColor(event.priority || "medium")
+                                  )}
+                                  onClick={() => handleEditEvent(event)}
+                                >
+                                  <div className="font-medium">{event.title}</div>
+                                  <div className="text-[10px] text-muted-foreground">
+                                    {new Date(event.starts_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
+
+          {view === "week" && (
+            <Card className="rounded-lg border">
+              <CardContent className="p-6">{renderWeekView()}</CardContent>
+            </Card>
+          )}
+
+          {view === "day" && (
+            <Card className="rounded-lg border">
+              <CardContent className="p-6">{renderDayView()}</CardContent>
+            </Card>
+          )}
+        </div>
       </div>
 
-      {/* Main Content */}
-      <div className="col-span-9 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Calendar</h1>
-            <p className="text-muted-foreground">Manage your events and schedule</p>
-          </div>
-          <Button
-            variant="default"
-            onClick={handleCreateEvent}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
-          >
-            <RxPlus className="mr-2" />
-            New Event
-          </Button>
-        </div>
-
-        {/* View Tabs */}
-        <div className="flex gap-2 border-b">
-          {(["month", "week", "day"] as const).map((v) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              className={cn(
-                "px-6 py-2 text-sm font-medium transition-colors capitalize border-b-2",
-                view === v
-                  ? "border-[hsl(var(--primary))] text-[hsl(var(--primary))]"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {v}
-            </button>
-          ))}
-        </div>
-
-        {/* Month Navigation */}
-        {view === "month" && (
-          <>
-            <div className="flex items-center justify-between">
-              <Button variant="ghost" size="icon" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}>
-                <RxChevronLeft className="h-5 w-5" />
-              </Button>
-              <h2 className="text-2xl font-bold">{monthName}</h2>
-              <Button variant="ghost" size="icon" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}>
-                <RxChevronRight className="h-5 w-5" />
-              </Button>
+      {/* Mobile layout */}
+      <div className="md:hidden space-y-4">
+        {/* Horizontal mini-calendar strip */}
+        <div className="mx-4 mt-2 bg-[hsl(var(--card))] rounded-lg p-3">
+          <div className="flex items-center justify-between mb-2">
+            <Button variant="ghost" size="icon" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 7))}>
+              <RxChevronLeft className="h-5 w-5" />
+            </Button>
+            <div className="text-sm font-semibold text-foreground">
+              {currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
             </div>
+            <Button variant="ghost" size="icon" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 7))}>
+              <RxChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+            {getWeekDays().map((d, idx) => {
+              const isToday = d.toDateString() === new Date().toDateString();
+              const isSelected = d.toDateString() === currentDate.toDateString();
+              return (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentDate(new Date(d))}
+                  className={cn(
+                    "flex flex-col items-center justify-center min-w-[44px]",
+                    isSelected ? "text-[hsl(var(--primary))]" : "text-foreground"
+                  )}
+                >
+                  <span className="text-[10px] text-muted-foreground">
+                    {daysOfWeek[d.getDay()]}
+                  </span>
+                  <span
+                    className={cn(
+                      "mt-1 h-8 w-8 flex items-center justify-center rounded-full",
+                      isSelected ? "bg-primary text-primary-foreground" : "bg-background text-foreground border border-border"
+                    )}
+                  >
+                    {d.getDate()}
+                  </span>
+                  <span
+                    className={cn(
+                      "mt-1 h-1 w-6 rounded-full",
+                      isToday ? "bg-primary" : "bg-transparent"
+                    )}
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-            {/* Calendar Grid */}
-            <Card className="rounded-lg border">
-              <CardContent className="p-6">
-                <div className="grid grid-cols-7 gap-2 mb-2">
-                  {daysOfWeek.map((day) => (
-                    <div
-                      key={day}
-                      className="text-center text-sm font-semibold text-foreground p-2 border-b-2 border-border border-[hsl(var(--foreground))] text-[hsl(var(--foreground))]"
-                    >
-                      {day}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-7 gap-2">
-                  {days.map((day, idx) => (
-                    <div
-                      key={idx}
-                      className={cn(
-                        "min-h-[100px] border-2 rounded-lg p-2 transition-colors",
-                        "border-border dark:border-white/10",
-                        day === today && "border-[hsl(var(--primary))] dark:border-[hsl(var(--primary))]",
-                        !day && "border-[hsl(var(--foreground))]"
-                      )}
-                    >
-                      {day && (
-                        <>
-                          <div className="flex items-start justify-between mb-1">
-                            <span
-                              className={cn(
-                                "inline-flex h-7 w-7 items-center justify-center rounded-md text-sm font-semibold",
-                                day === today
-                                  ? "bg-primary text-primary-foreground shadow-sm"
-                                  : "border-[hsl(var(--foreground))] text-[hsl(var(--foreground))]"
-                              )}
-                            >
-                              {day}
-                            </span>
-                          </div>
-                          <div className="space-y-1">
-                            {getEventsForDate(day).map((event) => (
-                              <div
-                                key={event.id}
-                                className={cn(
-                                  "text-xs p-1 rounded border-l-2 cursor-pointer hover:opacity-80",
-                                  getPriorityColor(event.priority || "medium")
-                                )}
-                                onClick={() => handleEditEvent(event)}
-                              >
-                                <div className="font-medium">{event.title}</div>
-                                <div className="text-[10px] text-muted-foreground">
-                                  {new Date(event.starts_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </>
-        )}
-
-        {view === "week" && (
+        {/* Main calendar resized for mobile */}
+        <div className="px-4">
           <Card className="rounded-lg border">
-            <CardContent className="p-6">{renderWeekView()}</CardContent>
+            <CardContent className="p-3">
+              {view === "day" ? (
+                renderDayView()
+              ) : view === "week" ? (
+                renderWeekView()
+              ) : (
+                <>
+                  <div className="flex items-center justify-between mb-2">
+                    <Button variant="ghost" size="icon" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}>
+                      <RxChevronLeft className="h-5 w-5" />
+                    </Button>
+                    <div className="text-base font-semibold">{monthName}</div>
+                    <Button variant="ghost" size="icon" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}>
+                      <RxChevronRight className="h-5 w-5" />
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-7 text-center text-xs text-foreground/70 border-b border-border pb-2">
+                    {daysOfWeek.map((d) => (
+                      <div key={d}>{d}</div>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-7 gap-1">
+                    {days.map((day, idx) => (
+                      <div
+                        key={idx}
+                        className={cn(
+                          "h-10 flex items-center justify-center rounded-md border",
+                          day ? "border-border" : "border-transparent",
+                          day === today && "border-[hsl(var(--primary))]"
+                        )}
+                        onClick={() => day && setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), day))}
+                      >
+                        <span className={cn("text-xs", day === today ? "text-[hsl(var(--primary))]" : "text-foreground")}>{day || ""}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </CardContent>
           </Card>
-        )}
+        </div>
 
-        {view === "day" && (
-          <Card className="rounded-lg border">
-            <CardContent className="p-6">{renderDayView()}</CardContent>
-          </Card>
-        )}
+        {/* Event history stacked at bottom */}
+        <div className="px-4 pb-4">
+          <EventHistory />
+        </div>
       </div>
 
       {/* Event Dialog */}
