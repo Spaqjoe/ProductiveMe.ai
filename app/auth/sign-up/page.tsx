@@ -15,7 +15,6 @@ export default function SignUpPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,6 +22,8 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -40,7 +41,7 @@ export default function SignUpPage() {
       alert("Account created! Please check your email to verify your account.");
       router.push("/auth/sign-in");
     } catch (error: any) {
-      setError(error.message);
+      setError(error.message || "Failed to create account. Please try again.");
     } finally {
       setLoading(false);
     }
