@@ -23,7 +23,6 @@ import { RiStockLine } from "react-icons/ri";
 
 export function Topbar() {
   const router = useRouter();
-  const supabase = createClient();
   const { theme, setTheme } = useTheme();
   const [user, setUser] = useState<any>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -43,6 +42,8 @@ export function Topbar() {
   useEffect(() => {
     setMounted(true);
     const getUser = async () => {
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
     };
@@ -51,6 +52,8 @@ export function Topbar() {
 
   useEffect(() => {
     if (user) {
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       const fetchNotifications = async () => {
         const { data } = await supabase
           .from("notifications")
@@ -90,6 +93,8 @@ export function Topbar() {
   useEffect(() => {
     const ensureSession = async () => {
       if (!aiSheetOpen || aiSessionId) return;
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       const { data, error } = await supabase
@@ -109,6 +114,8 @@ export function Topbar() {
     setAiStreaming(true);
 
     try {
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       // Persist user message
       if (aiSessionId) {
         await supabase.from("ai_messages").insert({ session_id: aiSessionId, role: "user", content: prompt });
@@ -158,6 +165,8 @@ export function Topbar() {
   };
 
   const handleSignOut = async () => {
+    // Create client only when needed (lazy initialization)
+    const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/auth/sign-in");
   };
@@ -166,6 +175,8 @@ export function Topbar() {
     if (!user) return;
 
     try {
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       const { error } = await supabase
         .from("notifications")
         .delete()
@@ -181,6 +192,8 @@ export function Topbar() {
 
   const handleDeleteNotification = async (id: string) => {
     try {
+      // Create client only when needed (lazy initialization)
+      const supabase = createClient();
       const { error } = await supabase
         .from("notifications")
         .delete()

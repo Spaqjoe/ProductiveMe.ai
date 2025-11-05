@@ -7,9 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export function EventHistory() {
     const [todayEvents, setTodayEvents] = useState<any[]>([]);
     const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
-    const supabase = createClient();
 
     useEffect(() => {
+        // Create client only when needed (lazy initialization)
+        const supabase = createClient();
+        
         const fetchEvents = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;

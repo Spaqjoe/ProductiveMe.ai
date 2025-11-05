@@ -8,9 +8,11 @@ import { Badge } from "@/components/ui/badge";
 export function StickyNotesWidget() {
   const [events, setEvents] = useState<any[]>([]);
   const [reminders, setReminders] = useState<any[]>([]);
-  const supabase = createClient();
 
   useEffect(() => {
+    // Create client only when needed (lazy initialization)
+    const supabase = createClient();
+    
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
