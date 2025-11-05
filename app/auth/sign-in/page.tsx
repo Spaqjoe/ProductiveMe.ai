@@ -20,6 +20,16 @@ export default function SignInPage() {
         setError("");
         setLoading(true);
 
+        // Check if Supabase is configured
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (!supabaseUrl || !supabaseKey || supabaseUrl.includes("placeholder") || supabaseKey.includes("placeholder")) {
+            setError("Supabase is not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your environment variables.");
+            setLoading(false);
+            return;
+        }
+
         try {
             // Create client only when needed (lazy initialization)
             const supabase = createClient();
@@ -33,7 +43,12 @@ export default function SignInPage() {
             router.push("/dashboard");
             router.refresh();
         } catch (error: any) {
-            setError(error.message || "Failed to sign in. Please check your credentials.");
+            // Check if it's a network/configuration error
+            if (error?.message?.includes("fetch") || error?.message?.includes("network") || error?.message?.includes("placeholder")) {
+                setError("Unable to connect to Supabase. Please check your configuration.");
+            } else {
+                setError(error.message || "Failed to sign in. Please check your credentials.");
+            }
         } finally {
             setLoading(false);
         }
